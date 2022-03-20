@@ -67,7 +67,7 @@ cdef class Compute_Similarity_Cython:
     cdef int use_row_weights
     cdef double[:] row_weights
 
-    cdef double[:,:] W_dense
+    cdef float[:,:] W_dense
 
     def __init__(self, dataMatrix, topK = 100, shrink=0, normalize = True,
                  asymmetric_alpha = 0.5, tversky_alpha = 1.0, tversky_beta = 1.0,
@@ -210,7 +210,7 @@ cdef class Compute_Similarity_Cython:
 
 
         if self.TopK == 0:
-            self.W_dense = np.zeros((self.n_columns,self.n_columns))
+            self.W_dense = np.zeros((self.n_columns,self.n_columns), dtype=np.float32)
 
 
 
@@ -433,7 +433,7 @@ cdef class Compute_Similarity_Cython:
 
         # Data structure to incrementally build sparse matrix
         # Preinitialize max possible length
-        cdef double[:] values = np.zeros((self.n_columns*self.TopK))
+        cdef float[:] values = np.zeros((self.n_columns*self.TopK), dtype=np.float32)
         cdef int[:] rows = np.zeros((self.n_columns*self.TopK,), dtype=np.int32)
         cdef int[:] cols = np.zeros((self.n_columns*self.TopK,), dtype=np.int32)
         cdef long sparse_data_pointer = 0
@@ -589,19 +589,40 @@ cdef class Compute_Similarity_Cython:
 
         # End while on columns
 
+        print("Computed similarity, elapsed %.2f min" % ((time.time()-start_time) / 60))
 
         if self.TopK == 0:
-
-            return np.array(self.W_dense)
+            print("Converting dense matrix")
+            W_dense = np.array(self.W_dense)
+            print("Converted dense matrix")
+            return W_dense
 
         else:
+            print("sparse_data_pointer %d" % sparse_data_pointer)
+            print("Shape of values: %r" % values.shape)
+            print("Shape of rows: %r" % rows.shape)
+            print("Shape of cols: %r" % cols.shape)
+            print("Size of values: %.2f GB" % (values.size * values.itemsize / 1024 / 1024 / 1024))
+            print("Size of rows: %.2f GB" % (rows.size * rows.itemsize / 1024 / 1024 / 1024))
+            print("Size of cols: %.2f GB" % (cols.size * cols.itemsize / 1024 / 1024 / 1024))
 
-            values = np.array(values[0:sparse_data_pointer])
+            print('Rows converting')
             rows = np.array(rows[0:sparse_data_pointer])
+            print('Rows converted')
+
+            print('Columns converting')
             cols = np.array(cols[0:sparse_data_pointer])
+            print('Columns converted')
+
+            print('Values converting')
+            values = np.array(values[0:sparse_data_pointer])
+            print('Values converted')
+
+            print("Building sparse matrix")
 
             W_sparse = sps.csr_matrix((values, (rows, cols)),
                                     shape=(self.n_columns, self.n_columns),
                                     dtype=np.float32)
+            print("Built sparse matrix")
 
             return W_sparse
