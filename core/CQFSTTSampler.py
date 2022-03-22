@@ -44,8 +44,7 @@ class CQFSTTSampler:
         return tn.argmin(target)
 
     def sample(self, *, FPM, s, k):
-        assert FPM.dtype == np.float32
-        FPM = torch.tensor(FPM, dtype=torch.float32)
+        FPM = torch.tensor(FPM, dtype=torch.float64)
         f = self._optimize(FPM, s, k)
         return {
             i: f[i]

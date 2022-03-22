@@ -301,15 +301,14 @@ class CQFSTT:
         selection_folder_path = f"{self.base_folder_path}{expID}/{self.selection_type}/"
         return DataIO(selection_folder_path)
 
-    def __save_selection(self, expID, selection, response):
+    def __save_selection(self, expID, selection):
 
         selection_dataIO = self.__get_selection_dataIO(expID)
         selection_dict = {
             'selection': selection,
-            'response': response.to_serializable(),
         }
         selection_dataIO.save_data(self.selection_type, selection_dict)
-        self.__print(f"[{expID}] Selection and response saved.")
+        self.__print(f"[{expID}] Selection saved.")
 
     def __load_selection(self, expID):
 
@@ -346,7 +345,7 @@ class CQFSTT:
 
         self.__print(f"[{expID}] Sampling the problem.")
         response_time = time.time()
-        response = self.solver.sample(FPM=FPM, k=k, s=combination_strength)
+        best_sample = self.solver.sample(FPM=FPM, k=k, s=combination_strength)
         response_time = time.time() - response_time
 
         experiment_timings = {
@@ -362,13 +361,12 @@ class CQFSTT:
         self.timings['avg_response_time'][self.selection_type] = (total_response_time + response_time) / n_experiments
         self.__save_timings()
 
-        best_sample = response.first.sample
         selection = self.__get_selection_from_sample(best_sample)
 
         self.__print(f"[{expID}] Selected {selection.sum()} features in {response_time} sec.")
 
         self.selections[expID] = selection.copy()
-        self.__save_selection(expID, selection, response)
+        self.__save_selection(expID, selection)
         return selection
 
     def select_many_p(self, ps, alphas, betas, combination_strengths, vartype='BINARY', save_FPMs=False, parameter_product=True):
