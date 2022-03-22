@@ -255,6 +255,8 @@ class CQFSTT:
                 self.__print(f"[{fitID}] Computed {FPM_statistics_file}. Saving to file.")
                 experiment_dataIO.save_data(FPM_statistics_file, FPM_statistics)
 
+            FPM = FPM.todense()
+
             if save_FPM:
                 FPM_file = 'FPM'
                 try:
