@@ -1,6 +1,7 @@
 import tntorch as tn
 import torch
 torch.set_default_dtype(torch.float64)
+DTYPE = torch.float64
 
 
 class CQFSTTSampler:
@@ -16,7 +17,7 @@ class CQFSTTSampler:
         # First term: x @ W @ x^T
         ts = []
         for n in range(N):
-            c = torch.zeros([1, 2, 1])
+            c = torch.zeros([1, 2, 1], dtype=DTYPE)
             c[0, 1, 0] = 1
             t = tn.Tensor([c])[:, None]
             t.cores[1] = t.cores[1].repeat(1, N, 1)
@@ -29,11 +30,11 @@ class CQFSTTSampler:
         t2 = t.clone()
         t.cores[-1] = torch.einsum('ijl,jk->ikl', t.cores[-1], W)
         term1 = tn.cross(tensors=[t, t2], function=lambda x, y: x * y,
-                         ranks_tt=N * 2 + 1, eps=eps)
+                         ranks_tt=N * 2 + 1, max_iter=50, eps=eps)
         term1 = tn.sum(term1, dim=-1)
 
         # Second term
-        c = torch.eye(2, 2)[:, None, :].repeat(1, 2, 1)
+        c = torch.eye(2, 2, dtype=DTYPE)[:, None, :].repeat(1, 2, 1)
         c[1, 0, 0] = (-k) ** 2
         c[1, 1, 0] = (1 - k) ** 2
         xs = tn.Tensor([c[-1:, :, :]] + [c] * (N - 2) + [c[:, :, 0:1]])
@@ -44,7 +45,7 @@ class CQFSTTSampler:
         return tn.argmin(target)
 
     def sample(self, *, FPM, s, k):
-        FPM = torch.tensor(FPM)
+        FPM = torch.tensor(FPM, dtype=DTYPE)
         f = self._optimize(FPM, s, k)
         return {
             i: f[i]
