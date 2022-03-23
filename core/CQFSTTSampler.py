@@ -3,7 +3,7 @@ import torch
 import operator
 torch.set_default_dtype(torch.float64)
 DTYPE = torch.float64
-DEVICE = torch.device('cuda:2')
+DEVICE = torch.device('cpu')
 
 
 class CQFSTTSampler:
@@ -48,9 +48,8 @@ class CQFSTTSampler:
         return tn.argmin(target, rmax=50, verbose=True)
 
     def sample(self, *, FPM, s, k):
-        with torch.cuda.device(DEVICE):
-            FPM = torch.tensor(FPM, dtype=DTYPE, device=DEVICE)
-            f = self._optimize(FPM, s, k)
+        FPM = torch.tensor(FPM, dtype=DTYPE, device=DEVICE)
+        f = self._optimize(FPM, s, k)
         return {
             i: f[i]
             for i in range(len(f))
