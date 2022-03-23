@@ -48,8 +48,9 @@ class CQFSTTSampler:
         return tn.argmin(target, rmax=50, verbose=True)
 
     def sample(self, *, FPM, s, k):
-        FPM = torch.tensor(FPM, dtype=DTYPE, device=DEVICE)
-        f = self._optimize(FPM, s, k)
+        with torch.cuda.device(DEVICE):
+            FPM = torch.tensor(FPM, dtype=DTYPE, device=DEVICE)
+            f = self._optimize(FPM, s, k)
         return {
             i: f[i]
             for i in range(len(f))
