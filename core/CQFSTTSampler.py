@@ -45,7 +45,7 @@ class CQFSTTSampler:
 
         # Minimize tensor
         target = tn.round_tt(term1 + term2, eps=eps)
-        return tn.argmin(target, rmax=50, verbose=True)
+        return tn.argmin(target, rmax=50, max_iter=25, verbose=True)
 
     def sample(self, *, FPM, s, k):
         FPM = torch.tensor(FPM, dtype=DTYPE, device=DEVICE)
