@@ -30,10 +30,9 @@ def main():
     CF_recommender_classes = [ItemKNNCFRecommender, PureSVDItemRecommender, RP3betaRecommender]
 
     save_FPMs = True
-    save_BQMs = True
 
     run_CQFSTT(data_loader, ICM_name, percentages, alphas, betas, combination_strengths,
-               CF_recommender_classes, save_FPMs, save_BQMs)
+               CF_recommender_classes, save_FPMs)
 
 
 if __name__ == '__main__':

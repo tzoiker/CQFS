@@ -268,6 +268,7 @@ class CQFSTT:
                     experiment_dataIO.save_data(FPM_file, {'FPM': FPM})
 
             # self.IPMs[fitID] = IPM.copy()
+            self.__print(f"[{fitID}] FPM shape {FPM.shape}")
             self.FPMs[fitID] = FPM.copy()
             # self.BQMs[fitID] = BQM.copy()
 
