@@ -95,8 +95,8 @@ class CQFSTT:
             self.timings['avg_response_time'] = {}
             self.timings['n_select_experiments'] = {}
 
-            FPM_K, IPM_K_time, FPM_K_time, QUBO_K_time = self._compute_fpm(K)
-            FPM_E, IPM_E_time, FPM_E_time, QUBO_E_time = self._compute_fpm(E)
+            self.FPM_K, IPM_K_time, FPM_K_time, QUBO_K_time = self._compute_fpm(K)
+            self.FPM_E, IPM_E_time, FPM_E_time, QUBO_E_time = self._compute_fpm(E)
             IPM_time = IPM_K_time + IPM_E_time
             FPM_time = FPM_K_time + FPM_E_time
             QUBO_time = QUBO_K_time + QUBO_E_time
