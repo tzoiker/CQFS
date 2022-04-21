@@ -45,7 +45,7 @@ class CQFSTT:
 
         self.saved_models = self.__load_previously_saved_models()
 
-        if not self.saved_models['K'] or not self.saved_models['E']:
+        if not self.saved_models['FPM_K'] or not self.saved_models['FPM_E']:
             ##################################################
             # Model initialization
 
@@ -67,8 +67,8 @@ class CQFSTT:
             # Compute the bonus for similarities in common
 
             K_time = time.time()
-            self.K = S_CBF.multiply(S_CF_bool)
-            self.K.data = -self.K.data
+            K = S_CBF.multiply(S_CF_bool)
+            K.data = -K.data
             K_time = time.time() - K_time
 
             #########################
@@ -76,11 +76,11 @@ class CQFSTT:
 
             E_time = time.time()
             S_intersection = S_CBF_bool.multiply(S_CF_bool)
-            self.E = S_CBF_bool - S_intersection
-            self.E = S_CBF.multiply(self.E)
+            E = S_CBF_bool - S_intersection
+            E = S_CBF.multiply(E)
             E_time = time.time() - E_time
 
-            assert self.K.nnz + self.E.nnz == S_CBF.nnz, "The number of items to keep and to penalize is not correct."
+            assert K.nnz + E.nnz == S_CBF.nnz, "The number of items to keep and to penalize is not correct."
 
             S_union = S_CF_bool + S_CBF_bool
 
@@ -92,21 +92,30 @@ class CQFSTT:
             self.timings['base_model_time'] = base_model_time
             self.timings['K_time'] = K_time
             self.timings['E_time'] = E_time
-
-            self.timings['avg_IPM_time'] = 0
-            self.timings['avg_FPM_time'] = 0
-            self.timings['avg_QUBO_time'] = 0
-            self.timings['n_fit_experiments'] = 0
             self.timings['avg_response_time'] = {}
             self.timings['n_select_experiments'] = {}
+
+            FPM_K, IPM_K_time, FPM_K_time, QUBO_K_time = self._compute_fpm(K)
+            FPM_E, IPM_E_time, FPM_E_time, QUBO_E_time = self._compute_fpm(E)
+            IPM_time = IPM_K_time + IPM_E_time
+            FPM_time = FPM_K_time + FPM_E_time
+            QUBO_time = QUBO_K_time + QUBO_E_time
+
+            self.timings['avg_IPM_time'] = IPM_time
+            self.timings['avg_FPM_time'] = FPM_time
+            self.timings['avg_QUBO_time'] = QUBO_time
+            self.timings['n_fit_experiments'] = 1
+
             self.__save_timings()
 
-            self.saved_models['K'] = True
-            self.saved_models['E'] = True
+            self.saved_models['FPM_K'] = True
+            self.saved_models['FPM_E'] = True
 
             self.dataIO.save_data(self.SAVED_MODELS_FILE, self.saved_models)
-            self.dataIO.save_data('K', {'K': self.K})
-            self.dataIO.save_data('E', {'E': self.E})
+            self.dataIO.save_data('K', {'K': K})
+            self.dataIO.save_data('E', {'E': E})
+            self.dataIO.save_data('FPM_K', {'FPM_K': self.FPM_K})
+            self.dataIO.save_data('FPM_E', {'FPM_E': self.FPM_E})
 
             self.__print("Base models successfully built.")
         else:
@@ -145,10 +154,10 @@ class CQFSTT:
         model_file = f'{model}.zip'
 
         try:
-            if model == 'K':
-                self.K = self.dataIO.load_data(model_file)['K']
-            elif model == 'E':
-                self.E = self.dataIO.load_data(model_file)['E']
+            if model == 'FPM_K':
+                self.FPM_K = self.dataIO.load_data(model_file)['FPM_K']
+            elif model == 'FPM_E':
+                self.FPM_E = self.dataIO.load_data(model_file)['FPM_E']
             return True
 
         except FileNotFoundError:
@@ -159,8 +168,8 @@ class CQFSTT:
         self.__print("Trying to load previously saved models.")
 
         saved_models = {
-            'K': False,
-            'E': False,
+            'FPM_K': False,
+            'FPM_E': False,
         }
 
         try:
@@ -188,6 +197,24 @@ class CQFSTT:
 
         return n_features * p
 
+    def _compute_fpm(self, IPM):
+        QUBO_time = time.time()
+        IPM_time = 0
+
+        ICM = self.ICM_train.astype(np.float64)
+        IPM = IPM.astype(np.float64)
+
+        FPM_time = time.time()
+        IFPM = IPM * ICM
+        IFPM.eliminate_zeros()
+        FPM = ICM.T * IFPM
+        FPM.eliminate_zeros()
+        FPM_time = time.time() - FPM_time
+        QUBO_time = time.time() - QUBO_time
+
+        return FPM, IPM_time, FPM_time, QUBO_time
+
+
     def fit(self, alpha=1, beta=1, vartype='BINARY', save_FPM=False):
 
         fitID = get_experiment_id(alpha, beta)
@@ -200,43 +227,9 @@ class CQFSTT:
             # if IPM is None:
             #     IPM = alpha * self.K + beta * self.E
 
-            QUBO_time = time.time()
-            IPM_time = time.time()
-            IPM = alpha * self.K + beta * self.E
-            IPM.eliminate_zeros()
-            IPM_time = time.time() - IPM_time
+            FPM = alpha * self.FPM_K + beta * self.FPM_E
 
-            FPM_time = time.time()
-            IFPM = IPM * self.ICM_train
-            IFPM.eliminate_zeros()
-            FPM = self.ICM_train.T * IFPM
-            FPM.eliminate_zeros()
-            FPM_time = time.time() - FPM_time
-            QUBO_time = time.time() - QUBO_time
-
-            experiment_timings = {
-                'IPM_time': IPM_time,
-                'FPM_time': FPM_time,
-                'QUBO_time': QUBO_time,
-            }
             experiment_dataIO = self.__get_experiment_dataIO(fitID)
-            experiment_dataIO.save_data(self.TIMINGS_FILE, experiment_timings)
-
-            n_experiments = self.timings['n_fit_experiments']
-            total_IPM_time = self.timings['avg_IPM_time'] * n_experiments
-            total_FPM_time = self.timings['avg_FPM_time'] * n_experiments
-            total_QUBO_time = self.timings['avg_QUBO_time'] * n_experiments
-
-            n_experiments += 1
-            self.timings['n_fit_experiments'] = n_experiments
-            self.timings['avg_IPM_time'] = (total_IPM_time + IPM_time) / n_experiments
-            self.timings['avg_FPM_time'] = (total_FPM_time + FPM_time) / n_experiments
-            self.timings['avg_QUBO_time'] = (total_QUBO_time + QUBO_time) / n_experiments
-
-            self.__save_timings()
-
-            self.__print(f"[{fitID}] Fitted in {QUBO_time} sec.")
-
             FPM_statistics_file = 'FPM_statistics'
             try:
                 experiment_dataIO.load_data(FPM_statistics_file)
