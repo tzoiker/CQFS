@@ -10,7 +10,7 @@ from utils.statistics import warm_similarity_statistics
 
 
 def run_CQFSTT(data_loader: DataLoader, ICM_name, percentages, alphas, betas, combination_strengths,
-             CF_recommender_classes, save_FPMs=False, parameter_product=True):
+             CF_recommender_classes, save_FPMs=False, parameter_product=True, *, sampler):
     ##################################################
     # Data loading and splitting
 
@@ -80,7 +80,7 @@ def run_CQFSTT(data_loader: DataLoader, ICM_name, percentages, alphas, betas, co
                                                 CBF_items_with_interactions=CBF_items_with_interactions)
 
         base_folder_path = f"../../results/{dataset_name}/{ICM_name}/{cf_recommender_name}/"
-        CQFS_selector = CQFSTT(ICM_train, S_CF, S_CBF, base_folder_path, statistics=statistics)
+        CQFS_selector = CQFSTT(ICM_train, S_CF, S_CBF, base_folder_path, statistics=statistics, sampler=sampler)
 
         ##################################################
         # Perform CQFS

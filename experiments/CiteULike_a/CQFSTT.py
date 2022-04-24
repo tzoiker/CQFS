@@ -1,12 +1,12 @@
 from core.CQFSTTSampler import CQFSTTSampler
-from data.DataLoader import XingChallenge2017Loader
+from data.DataLoader import CiteULike_aLoader
 from experiments.run_CQFSTT import run_CQFSTT
 from recsys.Recommender_import_list import ItemKNNCFRecommender, PureSVDItemRecommender, RP3betaRecommender
 
 
 def main():
-    data_loader = XingChallenge2017Loader()
-    ICM_name = 'ICM_all'
+    data_loader = CiteULike_aLoader()
+    ICM_name = 'ICM_title_abstract'
 
     percentages = [40, 60, 80, 95]
     alphas = [1]
@@ -17,10 +17,10 @@ def main():
 
     save_FPMs = False
 
-    sampler = CQFSTTSampler(evals=1e6)
+    sampler = CQFSTTSampler(evals=2e6)
 
-    run_CQFSTT(data_loader, ICM_name, percentages, alphas, betas, combination_strengths,
-               CF_recommender_classes, save_FPMs, sampler=sampler)
+    run_CQFSTT(data_loader, ICM_name, percentages, alphas, betas,
+               combination_strengths, CF_recommender_classes, save_FPMs, sampler=sampler)
 
 
 if __name__ == '__main__':

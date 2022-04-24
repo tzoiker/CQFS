@@ -3,7 +3,6 @@ import time
 
 import numpy as np
 
-from core.CQFSTTSampler import CQFSTTSampler
 from recsys.Base.DataIO import DataIO
 from utils.naming import get_experiment_id
 from utils.statistics import similarity_statistics, BQM_statistics
@@ -14,7 +13,7 @@ class CQFSTT:
     STATISTICS_FILE = 'statistics'
     TIMINGS_FILE = 'timings'
 
-    def __init__(self, ICM_train, S_CF, S_CBF, base_folder_path, statistics=None):
+    def __init__(self, ICM_train, S_CF, S_CBF, base_folder_path, statistics=None, *, sampler):
 
         self.n_items, self.n_features = ICM_train.shape
         self.ICM_train = ICM_train.copy()
@@ -124,7 +123,7 @@ class CQFSTT:
         ##################################################
         # Solver initialization
 
-        self.solver = CQFSTTSampler(tol=1e-4)
+        self.solver = sampler
         self.selection_type = 'cqfs_tt'
 
         if self.timings['avg_response_time'].get(self.selection_type) is None:
@@ -262,7 +261,7 @@ class CQFSTT:
 
             # self.IPMs[fitID] = IPM.copy()
             self.__print(f"[{fitID}] FPM shape {FPM.shape}")
-            self.FPMs[fitID] = FPM.copy()
+            self.FPMs[fitID] = FPM
             # self.BQMs[fitID] = BQM.copy()
 
         # else:

@@ -11,7 +11,7 @@ from utils.statistics import warm_similarity_statistics
 
 
 def train_CQFSTT(data_loader: DataLoader, ICM_name, percentages, alphas, betas, combination_strengths,
-               CF_recommender_classes, parameter_product=True, cpu_count_div=2, cpu_count_sub=0):
+               CF_recommender_classes, parameter_product=True, cpu_count_div=2, cpu_count_sub=0, *, sampler):
     N_CASES = 50
     N_RAN_STARTS = 15
     SIMILARITY_TYPE = 'cosine'
@@ -94,7 +94,7 @@ def train_CQFSTT(data_loader: DataLoader, ICM_name, percentages, alphas, betas, 
                                                 CBF_items_with_interactions=CBF_items_with_interactions)
 
         base_folder_path = f"../../results/{dataset_name}/{ICM_name}/{cf_recommender_name}/"
-        CQFS_selector = CQFSTT(ICM_train, S_CF, S_CBF, base_folder_path, statistics=statistics)
+        CQFS_selector = CQFSTT(ICM_train, S_CF, S_CBF, base_folder_path, statistics=statistics, sampler=sampler)
 
         ##################################################
         # Train CQFS ItemKNNCBFRecommender

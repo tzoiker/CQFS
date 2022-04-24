@@ -1,13 +1,14 @@
 from core.CQFSTTSampler import CQFSTTSampler
-from data.DataLoader import XingChallenge2017Loader
+from data.DataLoader import TheMoviesDatasetLoader
 from experiments.train_CQFSTT import train_CQFSTT
-from recsys.Recommender_import_list import ItemKNNCFRecommender, PureSVDItemRecommender, \
+from recsys.Recommender_import_list import ItemKNNCFRecommender, \
+    PureSVDItemRecommender, \
     RP3betaRecommender
 
 
 def main():
-    data_loader = XingChallenge2017Loader()
-    ICM_name = 'ICM_all'
+    data_loader = TheMoviesDatasetLoader()
+    ICM_name = 'ICM_metadata'
 
     percentages = [40, 60, 80, 95]
     alphas = [1]
@@ -21,8 +22,10 @@ def main():
 
     sampler = CQFSTTSampler(evals=1e6)
 
-    train_CQFSTT(data_loader, ICM_name, percentages, alphas, betas, combination_strengths,
-               CF_recommender_classes, cpu_count_div=cpu_count_div, cpu_count_sub=cpu_count_sub, sampler=sampler)
+    train_CQFSTT(data_loader, ICM_name, percentages, alphas, betas,
+                 combination_strengths,
+                 CF_recommender_classes, cpu_count_div=cpu_count_div,
+                 cpu_count_sub=cpu_count_sub, sampler=sampler)
 
 
 if __name__ == '__main__':
