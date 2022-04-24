@@ -248,7 +248,7 @@ class CQFSTT:
                 self.__print(f"[{fitID}] Computed {FPM_statistics_file}. Saving to file.")
                 experiment_dataIO.save_data(FPM_statistics_file, FPM_statistics)
 
-            FPM = FPM.todense()
+            FPM = np.array(FPM.todense())
 
             if save_FPM:
                 FPM_file = 'FPM'
@@ -316,6 +316,21 @@ class CQFSTT:
         except FileNotFoundError:
             self.__print(f"[{expID}] No previous selection found.")
 
+    def _bqm_from_fpm(self, fpm: np.ndarray, *, s: float, k: float):
+        assert fpm.shape[0] == fpm.shape[1]
+        F = len(fpm)
+        fpm_diag = np.diag(np.diag(fpm))
+        fpm_other = fpm - fpm_diag
+        bqm = fpm_diag + np.triu(fpm_other + fpm_other.T)
+        bqm = (
+            bqm
+            - 2 * k * s * np.eye(F)
+            + s * (2 * np.triu(np.ones((F, F))) - np.eye(F))
+        )
+        inv_scalar = max(-bqm.min(), bqm.max())
+        bqm /= inv_scalar
+        return bqm
+
     def select(self, alpha, beta, combination_strength=1):
         raise NotImplementedError("Method not implemented yet.")
 
@@ -337,9 +352,11 @@ class CQFSTT:
                 self.fit(alpha=alpha, beta=beta, vartype=vartype, save_FPM=save_FPM)
                 FPM = self.FPMs.get(fitID)
 
+        BQM = self._bqm_from_fpm(FPM, k=k, s=combination_strength)
+
         self.__print(f"[{expID}] Sampling the problem.")
         response_time = time.time()
-        best_sample = self.solver.sample(FPM=FPM, k=k, s=combination_strength)
+        best_sample = self.solver.sample(BQM)
         response_time = time.time() - response_time
 
         experiment_timings = {
