@@ -10,8 +10,8 @@ from utils.sparse import merge_sparse_matrices
 from utils.statistics import warm_similarity_statistics
 
 
-def train_CQFSTT(data_loader: DataLoader, ICM_name, percentages, alphas, betas, combination_strengths,
-               CF_recommender_classes, parameter_product=True, cpu_count_div=2, cpu_count_sub=0, *, sampler):
+def train_CQFSTT(*, data_loader: DataLoader, ICM_name, percentages, alphas, betas, combination_strengths,
+               CF_recommender_classes, parameter_product=True, cpu_count_div=2, cpu_count_sub=0, sampler):
     N_CASES = 50
     N_RAN_STARTS = 15
     SIMILARITY_TYPE = 'cosine'
