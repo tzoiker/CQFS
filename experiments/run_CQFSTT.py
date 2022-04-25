@@ -9,8 +9,8 @@ from utils.sparse import merge_sparse_matrices
 from utils.statistics import warm_similarity_statistics
 
 
-def run_CQFSTT(data_loader: DataLoader, ICM_name, percentages, alphas, betas, combination_strengths,
-             CF_recommender_classes, save_FPMs=False, parameter_product=True, *, sampler):
+def run_CQFSTT(*, data_loader: DataLoader, ICM_name, percentages, alphas, betas, combination_strengths,
+             CF_recommender_classes, save_FPMs=False, parameter_product=True, sampler):
     ##################################################
     # Data loading and splitting
 
