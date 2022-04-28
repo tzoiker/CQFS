@@ -1,7 +1,7 @@
 from core.CQFSTTSampler import CQFSTTSampler
 from data.DataLoader import XingChallenge2017Loader
 from experiments.train_CQFSTT import train_CQFSTT
-from recsys.Recommender_import_list import ItemKNNCFRecommender
+from recsys.Recommender_import_list import ItemKNNCFRecommender, PureSVDItemRecommender, RP3betaRecommender
 
 
 def main():
