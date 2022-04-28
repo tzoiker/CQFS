@@ -8,13 +8,13 @@ def main():
     data_loader = XingChallenge2017Loader()
     ICM_name = 'ICM_all'
 
-    parameter_product = False
+    parameter_product = True
     percentages = [40, 60, 80, 95]
-    alphas = [1, 1, 1, 1]
-    betas = [1e-3, 1e-4, 1e-3, 1e-4]
-    combination_strengths = [1e3, 1e1, 1e2, 1e3]
+    alphas = [1]
+    betas = [1, 1e-1, 1e-2, 1e-3, 1e-4]
+    combination_strengths = [1, 10, 100, 1000, 10000]
 
-    CF_recommender_classes = [ItemKNNCFRecommender]
+    CF_recommender_classes = [ItemKNNCFRecommender, PureSVDItemRecommender, RP3betaRecommender]
     sampler = CQFSTTSampler(evals=1e6)
 
     cpu_count_div = 1

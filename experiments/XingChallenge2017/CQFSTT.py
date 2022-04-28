@@ -1,20 +1,21 @@
 from core.CQFSTTSampler import CQFSTTSampler
 from data.DataLoader import XingChallenge2017Loader
 from experiments.run_CQFSTT import run_CQFSTT
-from recsys.Recommender_import_list import ItemKNNCFRecommender
+from recsys.Recommender_import_list import ItemKNNCFRecommender, PureSVDItemRecommender, RP3betaRecommender
 
 
 def main():
     data_loader = XingChallenge2017Loader()
     ICM_name = 'ICM_all'
 
-    parameter_product = False
+    parameter_product = True
     percentages = [40, 60, 80, 95]
-    alphas = [1, 1, 1, 1]
-    betas = [1e-3, 1e-4, 1e-3, 1e-4]
-    combination_strengths = [1e3, 1e1, 1e2, 1e3]
+    alphas = [1]
+    betas = [1, 1e-1, 1e-2, 1e-3, 1e-4]
+    combination_strengths = [1, 10, 100, 1000, 10000]
 
-    CF_recommender_classes = [ItemKNNCFRecommender]
+    CF_recommender_classes = [ItemKNNCFRecommender, PureSVDItemRecommender, RP3betaRecommender]
+
     sampler = CQFSTTSampler(evals=1e6)
 
     save_FPMs = False
