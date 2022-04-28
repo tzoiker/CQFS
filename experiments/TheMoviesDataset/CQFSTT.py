@@ -8,28 +8,12 @@ def main():
     data_loader = TheMoviesDatasetLoader()
     ICM_name = 'ICM_metadata'
 
-    parameter_product = False
-    parameter_per_recommender = True
-    percentages = [
-        [20, 30, 40, 60, 80, 95],
-        [20, 30, 40, 60, 80, 95],
-        [20, 30, 40, 60, 80, 95],
-    ]
-    alphas = [
-        [1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1],
-    ]
-    betas = [
-        [1e-4, 1e-4, 1e-3, 1e-4, 1e-3, 1e-3],
-        [1e-4, 1e-4, 1e-4, 1e-4, 1e-3, 1e-3],
-        [1e-3, 1e-4, 1e-4, 1e-4, 1e-4, 1e-3],
-    ]
-    combination_strengths = [
-        [1e2, 1e3, 1e2, 1e2, 1e2, 1e3],
-        [1e2, 1e2, 1e3, 1e3, 1e3, 1e2],
-        [1e2, 1e2, 1e3, 1e2, 1e3, 1e2],
-    ]
+    parameter_product = True
+    parameter_per_recommender = False
+    percentages = [5, 10, 20, 30, 40, 60, 80, 95]
+    alphas = [1]
+    betas = [1, 1e-1, 1e-2, 1e-3, 1e-4]
+    combination_strengths = [1, 10, 100, 1000, 10000]
 
     CF_recommender_classes = [
         ItemKNNCFRecommender,
