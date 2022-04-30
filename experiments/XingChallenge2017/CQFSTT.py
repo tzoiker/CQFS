@@ -16,7 +16,7 @@ def main():
 
     CF_recommender_classes = [ItemKNNCFRecommender, PureSVDItemRecommender, RP3betaRecommender]
 
-    sampler = CQFSTTSampler(evals=1e6)
+    sampler = CQFSTTSampler(rmax=2, evals=1e4)
 
     save_FPMs = False
 

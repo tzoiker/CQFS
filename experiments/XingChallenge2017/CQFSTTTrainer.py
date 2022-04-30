@@ -15,7 +15,7 @@ def main():
     combination_strengths = [1, 10, 100, 1000, 10000]
 
     CF_recommender_classes = [ItemKNNCFRecommender, PureSVDItemRecommender, RP3betaRecommender]
-    sampler = CQFSTTSampler(evals=1e6)
+    sampler = CQFSTTSampler(rmax=2, evals=1e4)
 
     cpu_count_div = 1
     cpu_count_sub = 0
