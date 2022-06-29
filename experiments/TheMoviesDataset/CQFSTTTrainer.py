@@ -1,9 +1,9 @@
 from core.CQFSTTSampler import CQFSTTSampler
 from data.DataLoader import TheMoviesDatasetLoader
 from experiments.train_CQFSTT import train_CQFSTT
-from recsys.Recommender_import_list import ItemKNNCFRecommender, \
-    PureSVDItemRecommender, \
-    RP3betaRecommender
+from recsys.Recommender_import_list import (
+    ItemKNNCFRecommender, PureSVDItemRecommender, RP3betaRecommender,
+)
 
 
 def main():
